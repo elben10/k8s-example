@@ -1,0 +1,30 @@
+apiVersion: skaffold/v2beta16
+kind: Config
+build:
+  artifacts:
+    - image: elben10/frontend
+      docker:
+        dockerfile: images/frontend/Dockerfile
+      sync:
+        manual:
+          - src: src/frontend/src/**/*.js
+            dest: /app
+            strip: src/frontend/
+test:
+  - image: elben10/frontend
+    custom:
+      - command: kubectl exec deploy/frontend -- npm test -- --watchAll=false
+
+deploy:
+  helm:
+    releases:
+      - name: k8s-example
+        chartPath: charts/k8s-example
+        artifactOverrides:
+          image: elben10/frontend
+profiles:
+  - name: development
+    patches:
+      - op: replace
+        path: /build/artifacts/0/docker/dockerfile
+        value: images/frontend/Dockerfile.dev
