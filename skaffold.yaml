@@ -18,7 +18,6 @@ build:
           - src: src/api/src/**/*.py
             dest: /app
             strip: src/api/
-
 deploy:
   helm:
     releases:
