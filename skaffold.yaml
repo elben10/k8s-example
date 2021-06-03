@@ -10,10 +10,14 @@ build:
           - src: src/frontend/src/**/*.js
             dest: /app
             strip: src/frontend/
-test:
-  - image: elben10/frontend
-    custom:
-      - command: kubectl exec deploy/frontend -- npm test -- --watchAll=false
+    - image: elben10/api
+      docker:
+        dockerfile: images/api/Dockerfile
+      sync:
+        manual:
+          - src: src/api/src/**/*.py
+            dest: /app
+            strip: src/api/
 
 deploy:
   helm:
@@ -21,10 +25,15 @@ deploy:
       - name: k8s-example
         chartPath: charts/k8s-example
         artifactOverrides:
-          image: elben10/frontend
+          apiImage: elben10/api
+          frontendImage: elben10/frontend
 profiles:
   - name: development
     patches:
       - op: replace
         path: /build/artifacts/0/docker/dockerfile
         value: images/frontend/Dockerfile.dev
+      - op: replace
+        path: /build/artifacts/1/docker/dockerfile
+        value: images/api/Dockerfile.dev
+        
